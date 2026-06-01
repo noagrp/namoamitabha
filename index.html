@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>南无阿弥陀佛 - Namo Amitabha</title>
+    <style>
+        /* Global Box Sizing */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* CSS Formatting */
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background-color: #111;
+            font-family: 'Kaiti', 'STKaiti', serif; 
+            color: #ffd700;
+            overscroll-behavior: none; 
+            touch-action: none;
+        }
+
+        /* Golden Rainbow Background Animation */
+        #background {
+            position: fixed; 
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: linear-gradient(60deg, 
+                #4a3300, /* Deep Gold */
+                #1a001a, /* Dark Violet */
+                #806600, /* Bright Gold */
+                #001a33, /* Dark Navy */
+                #664d00, /* Rich Gold */
+                #00331a  /* Dark Forest */
+            );
+            background-size: 400% 400%;
+            animation: gradientBG 18s ease infinite;
+            z-index: 1;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Canvas for 卍 Particles */
+        #particleCanvas {
+            position: fixed; 
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 2;
+            pointer-events: none; 
+        }
+
+        /* Intro Screen */
+        #introScreen {
+            position: fixed; 
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            text-align: center;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+            width: 100%;
+        }
+
+        h1 { font-size: 4.5rem; letter-spacing: 10px; margin-bottom: 20px; }
+
+        #enterBtn {
+            padding: 12px 30px; font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.5); color: #ffd700;
+            border: 1px solid #ffd700; border-radius: 4px;
+            cursor: pointer; transition: all 0.3s ease; font-family: inherit;
+        }
+        #enterBtn:hover { background: #ffd700; color: #111; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+
+        /* Absolute Center Sutra Text Container */
+        #sutraContainer {
+            position: fixed; 
+            top: 0; left: 0;
+            width: 100vw; height: 100vh; 
+            z-index: 2;
+            opacity: 0; 
+            transition: opacity 3s ease-in-out;
+            pointer-events: none; 
+        }
+
+        .sutra-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            writing-mode: vertical-rl; 
+            text-orientation: upright;
+            white-space: nowrap; 
+            font-size: clamp(3rem, 12vmin, 7rem);
+            letter-spacing: clamp(10px, 4vmin, 30px);
+            text-shadow: 0 0 25px rgba(255, 215, 0, 0.4), 2px 2px 10px rgba(0,0,0,1);
+        }
+
+        /* Information Panel Toggle (+) */
+        #infoToggleBtn {
+            position: fixed; 
+            bottom: 30px; right: 30px;
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 5;
+            display: flex; 
+            justify-content: center; align-items: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            transition: all 0.3s ease;
+            pointer-events: auto; 
+        }
+        #infoToggleBtn:hover { background: #ffd700; color: #111; }
+
+        /* Information Overlay Box */
+        #infoPanel {
+            position: fixed; 
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%; max-width: 700px; 
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid #ffd700;
+            border-radius: 8px;
+            padding: 30px;
+            color: #eee;
+            font-family: 'Kaiti', 'STKaiti', sans-serif; 
+            z-index: 6;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
+            line-height: 1.8;
+            max-height: 85vh;
+            overflow-y: auto; 
+            touch-action: pan-y; 
+        }
+        
+        #infoPanel h2 { 
+            color: #ffd700; margin-top: 0; font-size: 2.2rem; text-align: center; margin-bottom: 25px;
+        }
+        
+        .justify-text { text-align: justify; margin-bottom: 20px; font-size: 1.05rem; }
+        .highlight { color: #ffd700; font-weight: bold; font-size: 1.15rem; }
+
+        .close-btn {
+            display: block; padding: 8px 24px; margin: 35px auto 0;
+            background: transparent; border: 1px solid #ffd700; color: #ffd700;
+            cursor: pointer; border-radius: 4px; transition: 0.3s;
+            font-family: inherit; font-size: 1.1rem;
+        }
+        .close-btn:hover { background: #ffd700; color: #111; }
+
+        /* Custom Scrollbar */
+        #infoPanel::-webkit-scrollbar { width: 8px; }
+        #infoPanel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+        #infoPanel::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 4px; }
+
+        /* Responsive adjustments for exact mobile fitting */
+        @media (max-width: 768px) {
+            #infoPanel { width: 90%; padding: 25px 20px; }
+            h1 { font-size: 3rem; letter-spacing: 6px; } 
+        }
+
+        /* Utility Classes */
+        .hide { display: none !important; }
+        .show-block { display: block !important; }
+    </style>
+</head>
+<body>
+
+    <audio id="mantraAudio" loop>
+        <source src="https://raw.githubusercontent.com/noagrp/namoamitabha/main/NamoAmitabha.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div id="background"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <div id="introScreen">
+        <h1>六字佛号</h1>
+        <button id="enterBtn">念诵</button>
+    </div>
+
+    <div id="sutraContainer" class="hide">
+        <div class="sutra-text">
+            南無阿彌陀佛
+        </div>
+    </div>
+
+    <button id="infoToggleBtn" class="hide">+</button>
+
+    <div id="infoPanel" class="hide">
+        <h2>念诵“南无阿弥陀佛”的真义</h2>
+        <p class="justify-text">“南无阿弥陀佛”（Namo Amituofo）被称为“万德洪名”，是佛教净土宗最核心、最根本的修行法门。这句佛号虽然仅仅六个字，却涵盖了佛教极其深广的智慧与无尽的慈悲。</p>
+        
+        <p class="justify-text"><span class="highlight">1. 六字洪名的字面含义</span><br>
+        <strong>“南无”（Namo）：</strong>源自古梵文，意为“皈依”、“顶礼”、“归命”、“接受救度”。意味着修行者全身心地信赖和依靠。<br>
+        <strong>“阿弥陀佛”（Amitabha / Amitayus）：</strong>“阿”意为“无”；“弥陀”意为“量”；“佛”意为“觉悟者”。合起来就是“无量觉”。<br>
+        他包含了两个核心特质：一是<strong>“无量光”</strong>，代表智慧无穷，照耀十方世界，破除一切无明黑暗；二是<strong>“无量寿”</strong>，代表慈悲无尽，寿命永恒，救度众生永不休止。</p>
+
+        <p class="justify-text"><span class="highlight">2. 净土法门的核心：他力救度</span><br>
+        不同于完全依靠自身苦修的“自力”法门，念佛法门强调“他力”（阿弥陀佛的宏大愿力）。阿弥陀佛在因地修行时曾发下四十八大愿，承诺只要十方众生至心信乐，愿意往生他的国土，哪怕临终前只念诵十声这句佛号，也能在命终时得到佛的接引，往生“西方极乐世界”。这种法门被称为“三根普被，利钝全收”，无论智商高低、业障深浅，只要有信愿，皆可成就。</p>
+
+        <p class="justify-text"><span class="highlight">3. 什么是“西方极乐世界”？</span><br>
+        极乐世界并非世俗意义上享受物欲的神话天堂，而是一个为了让修行者免受六道轮回之苦、能够专心修道而建立的“究竟清净的宇宙大学”。在那里，没有一切身心烦恼与生存的痛苦（无有众苦，但受诸乐），环境庄严清净，众生与诸大菩萨为伴，寿命无量，最终必定修成正果。</p>
+
+        <p class="justify-text"><span class="highlight">4. 念佛的功德与日常利益</span><br>
+        除了追求终极的解脱，在现实生活中念佛也有极大的益处。当内心烦躁、恐惧、焦虑或杂念纷飞时，专注念诵“南无阿弥陀佛”，能够迅速收摄心神，达到定心、安神、消除负面情绪的作用。这句佛号就像是一颗能够澄清浑水的明矾（清水珠），能够沉淀心里的污垢，让心灵恢复原本的清净与光明，带来真实的平安与喜悦。</p>
+
+        <button class="close-btn" id="closeInfoBtn">关闭 (Close)</button>
+    </div>
+
+    <script>
+        // --- 1. UI Elements ---
+        const enterBtn = document.getElementById('enterBtn');
+        const introScreen = document.getElementById('introScreen');
+        const mantraAudio = document.getElementById('mantraAudio');
+        const sutraContainer = document.getElementById('sutraContainer');
+        const infoToggleBtn = document.getElementById('infoToggleBtn');
+        const infoPanel = document.getElementById('infoPanel');
+        const closeInfoBtn = document.getElementById('closeInfoBtn');
+        
+        let particlesActive = false;
+
+        // --- 2. Button Interactions ---
+        enterBtn.addEventListener('click', () => {
+            mantraAudio.play();
+            
+            introScreen.classList.add('hide');
+            sutraContainer.classList.remove('hide');
+            sutraContainer.classList.add('show-block'); 
+            
+            setTimeout(() => {
+                infoToggleBtn.classList.remove('hide');
+            }, 1000);
+            
+            setTimeout(() => {
+                sutraContainer.style.opacity = 1;
+            }, 100);
+
+            particlesActive = true;
+            initParticles();
+            animateParticles();
+        });
+
+        infoToggleBtn.addEventListener('click', () => {
+            infoPanel.classList.remove('hide');
+            infoPanel.classList.add('show-block');
+        });
+
+        closeInfoBtn.addEventListener('click', () => {
+            infoPanel.classList.remove('show-block');
+            infoPanel.classList.add('hide');
+        });
+
+        // --- 3. 卍 Golden Particle System ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        const numberOfParticles = 80;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 15 + 10; 
+                this.speedX = (Math.random() * 1) - 0.5;
+                this.speedY = (Math.random() * -1) - 0.5;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.angle = Math.random() * 360; 
+                this.spin = (Math.random() - 0.5) * 1.5; 
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.angle += this.spin; 
+
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y < 0) this.y = canvas.height;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+                
+                ctx.fillStyle = `rgba(255, 215, 0, ${this.opacity})`;
+                ctx.font = `${this.size}px 'Kaiti', 'STKaiti', serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "rgba(255, 215, 0, 0.8)";
+                
+                ctx.fillText('卍', 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            if (!particlesActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (particlesActive) initParticles();
+        });
+    </script>
+</body>
+</html>
